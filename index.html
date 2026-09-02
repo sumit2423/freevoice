@@ -78,15 +78,18 @@
   .tile {
     background: var(--panel); border: 3px solid #d7deec; border-radius: var(--tile-radius);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    aspect-ratio: 1; cursor: pointer; padding: 6px; transition: opacity .2s, transform .1s;
+    aspect-ratio: 1; cursor: pointer; padding: clamp(3px, 1.5vw, 6px); transition: opacity .2s, transform .1s;
     overflow: hidden;
   }
   .tile:active { transform: scale(0.94); }
   .tile.cooldown { opacity: 0.35; pointer-events: none; }
   .tile img { width: 70%; height: 70%; object-fit: cover; border-radius: 10px; }
-  .tile .emoji { font-size: 46px; }
-  .tile .label { margin-top: 6px; font-size: 14px; font-weight: 700; text-align: center; }
-  .tile-empty { visibility: hidden; }
+  .tile .emoji { font-size: clamp(22px, 8vw, 46px); }
+  .tile .label {
+    margin-top: clamp(2px, 1.2vw, 6px); font-size: clamp(10px, 3vw, 14px);
+    font-weight: 700; text-align: center;
+  }
+  .tile-empty { visibility: hidden; aspect-ratio: 1; }
 
   /* Frequently Used strip */
   #freqSection {
@@ -464,7 +467,7 @@
   let sentence = [];
 
   gridEl.style.gridTemplateColumns = `repeat(${GRID_COLS}, 1fr)`;
-  gridEl.style.gridTemplateRows = `repeat(${GRID_ROWS}, 1fr)`;
+  gridEl.style.gridTemplateRows = `repeat(${GRID_ROWS}, auto)`;
 
   function renderTabs() {
     tabsEl.innerHTML = "";

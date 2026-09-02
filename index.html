@@ -439,6 +439,8 @@
   migrateState(state);
   let tapLog = {}; // tileId -> [timestamps], in-memory fatigue filter (not the persisted usage log)
   let mediaRecorder = null, recordedChunks = [], pendingAudio = null, pendingImage = null;
+  let autoFilledLabel = null; // tracks a label we set from a symbol pick, so picking another can safely update it,
+                               // but a label the user typed/edited by hand is never touched
 
   function load() {
     try {
@@ -846,7 +848,10 @@
         wrap.classList.add("selected");
         symbolStatus.textContent = "Loading symbol…";
         const labelInput = document.getElementById("tileLabel");
-        if (!labelInput.value.trim()) labelInput.value = titleCase(keyword);
+        if (!labelInput.value.trim() || labelInput.value === autoFilledLabel) {
+          labelInput.value = titleCase(keyword);
+          autoFilledLabel = labelInput.value;
+        }
         try {
           const resp = await fetch(url);
           const blob = await resp.blob();
@@ -888,7 +893,7 @@
     if (!state.categories[state.currentCategory]) state.categories[state.currentCategory] = [];
     state.categories[state.currentCategory].push(tile);
     save();
-    pendingImage = null; pendingAudio = null;
+    pendingImage = null; pendingAudio = null; autoFilledLabel = null;
     document.getElementById("tileLabel").value = "";
     document.getElementById("tilePhoto").value = "";
     document.getElementById("symbolSearch").value = "";

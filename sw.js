@@ -1,4 +1,4 @@
-const CACHE = "freevoice-v6";
+const CACHE = "freevoice-v7";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon.svg", "./freevoice-core.js"];
 
 self.addEventListener("install", (e) => {

@@ -134,12 +134,19 @@
   #adminTileList .admin-tile select { font-size: 11px; padding: 4px; width: 100%; margin-top: 4px; }
 
   /* Symbol search results */
-  #symbolResults { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; max-height: 160px; overflow-y: auto; flex-shrink: 0; }
-  #symbolResults img {
-    width: 64px; height: 64px; object-fit: contain; background: white; border-radius: 8px;
-    padding: 4px; cursor: pointer; border: 3px solid transparent;
+  #symbolResults { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; max-height: 190px; overflow-y: auto; flex-shrink: 0; }
+  .symbol-result {
+    width: 72px; cursor: pointer; border: 3px solid transparent; border-radius: 8px; padding: 3px;
+    text-align: center;
   }
-  #symbolResults img.selected { border-color: var(--accent); }
+  .symbol-result img {
+    width: 100%; height: 64px; object-fit: contain; background: white; border-radius: 6px;
+  }
+  .symbol-result .symbol-caption {
+    font-size: 10px; line-height: 1.3; margin-top: 2px; color: #cbd2e0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .symbol-result.selected { border-color: var(--accent); }
 
   /* Rearrange grid */
   #rearrangeGrid { display: grid; gap: 6px; margin-top: 10px; }
@@ -160,18 +167,24 @@
   /* Help overlay */
   #helpOverlay {
     position: fixed; inset: 0; background: rgba(20,24,34,.92); color: white;
-    display: none; flex-direction: column; z-index: 55; padding: 20px; overflow-y: auto;
+    display: none; z-index: 55;
   }
-  #helpOverlay.open { display: flex; }
-  #helpOverlay h2 { margin: 0 0 12px; }
-  #helpOverlay h3 { margin: 20px 0 6px; border-top: 1px solid #3a4152; padding-top: 14px; }
-  #helpOverlay h3:first-of-type { border-top: none; padding-top: 0; }
-  #helpOverlay ul { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6; }
-  #helpOverlay li { margin-bottom: 4px; }
-  #helpOverlay code { background: #2a3040; padding: 1px 6px; border-radius: 4px; }
-  #helpOverlay details { margin-top: 20px; border-top: 1px solid #3a4152; padding-top: 14px; }
-  #helpOverlay summary { cursor: pointer; font-weight: 600; }
-  #helpOverlay details ul { margin-top: 10px; }
+  #helpOverlay.open { display: block; }
+  #helpCloseX {
+    position: absolute; top: 14px; right: 14px; z-index: 2;
+    width: 40px; height: 40px; border-radius: 50%; border: none;
+    background: #2a3040; color: white; font-size: 18px; line-height: 1; cursor: pointer;
+  }
+  #helpContent { height: 100%; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+  #helpContent h2 { margin: 0 44px 12px 0; }
+  #helpContent h3 { margin: 20px 0 6px; border-top: 1px solid #3a4152; padding-top: 14px; }
+  #helpContent h3:first-of-type { border-top: none; padding-top: 0; }
+  #helpContent ul { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+  #helpContent li { margin-bottom: 4px; }
+  #helpContent code { background: #2a3040; padding: 1px 6px; border-radius: 4px; }
+  #helpContent details { margin-top: 20px; border-top: 1px solid #3a4152; padding-top: 14px; }
+  #helpContent summary { cursor: pointer; font-weight: 600; }
+  #helpContent details ul { margin-top: 10px; }
 
   #pinScreen {
     position: fixed; inset: 0; background: rgba(20,24,34,.97); color: white; z-index: 60;
@@ -231,6 +244,8 @@
 </div>
 
 <div id="helpOverlay">
+  <button id="helpCloseX" title="Close">✕</button>
+  <div id="helpContent">
   <h2>How to use FreeVoice</h2>
 
   <h3>Talking</h3>
@@ -286,6 +301,7 @@
 
   <div class="admin-row" style="margin-top:20px;">
     <button class="admin-btn danger" id="closeHelpBtn">Close</button>
+  </div>
   </div>
 </div>
 
@@ -618,6 +634,7 @@
   const helpOverlay = document.getElementById("helpOverlay");
   document.getElementById("helpBtn").onclick = () => helpOverlay.classList.add("open");
   document.getElementById("closeHelpBtn").onclick = () => helpOverlay.classList.remove("open");
+  document.getElementById("helpCloseX").onclick = () => helpOverlay.classList.remove("open");
 
   function renderAll() { renderTabs(); renderGrid(); renderSentence(); renderFrequent(); }
   renderAll();
@@ -777,29 +794,56 @@
   const symbolResults = document.getElementById("symbolResults");
 
   async function searchSymbols(query) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
-      const res = await fetch(`https://api.arasaac.org/api/pictograms/en/search/${encodeURIComponent(query)}`);
+      const res = await fetch(`https://api.arasaac.org/api/pictograms/en/search/${encodeURIComponent(query)}`, { signal: controller.signal });
       if (!res.ok) return [];
       return await res.json();
-    } catch (e) { return []; }
+    } catch (e) {
+      return [];
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
-  document.getElementById("symbolSearchBtn").onclick = async () => {
-    const q = document.getElementById("symbolSearch").value.trim();
+  function titleCase(s) { return s.replace(/\b\w/g, c => c.toUpperCase()); }
+
+  const symbolSearchInput = document.getElementById("symbolSearch");
+  const symbolSearchBtn = document.getElementById("symbolSearchBtn");
+
+  async function runSymbolSearch() {
+    const q = symbolSearchInput.value.trim();
     if (!q) return;
-    symbolStatus.textContent = "Searching…";
+    symbolSearchBtn.disabled = true;
+    const originalLabel = symbolSearchBtn.textContent;
+    symbolSearchBtn.textContent = "Searching…";
+    symbolStatus.textContent = "";
     symbolResults.innerHTML = "";
     const results = await searchSymbols(q);
+    symbolSearchBtn.disabled = false;
+    symbolSearchBtn.textContent = originalLabel;
     symbolStatus.textContent = results.length ? `${results.length} results` : "No results / offline";
     results.slice(0, 24).forEach(r => {
+      const keyword = (r.keywords && r.keywords[0] && r.keywords[0].keyword) || q;
       const url = `https://static.arasaac.org/pictograms/${r._id}/${r._id}_300.png`;
+      const wrap = document.createElement("div");
+      wrap.className = "symbol-result";
       const img = document.createElement("img");
       img.src = url;
-      img.title = (r.keywords && r.keywords[0] && r.keywords[0].keyword) || q;
-      img.onclick = async () => {
+      img.alt = keyword;
+      img.title = keyword;
+      const caption = document.createElement("div");
+      caption.className = "symbol-caption";
+      caption.textContent = keyword;
+      wrap.appendChild(img);
+      wrap.appendChild(caption);
+      wrap.onclick = async () => {
         [...symbolResults.children].forEach(el => el.classList.remove("selected"));
-        img.classList.add("selected");
+        wrap.classList.add("selected");
         symbolStatus.textContent = "Loading symbol…";
+        const labelInput = document.getElementById("tileLabel");
+        if (!labelInput.value.trim()) labelInput.value = titleCase(keyword);
         try {
           const resp = await fetch(url);
           const blob = await resp.blob();
@@ -816,9 +860,14 @@
           symbolStatus.textContent = "Symbol selected (online only) ✓";
         }
       };
-      symbolResults.appendChild(img);
+      symbolResults.appendChild(wrap);
     });
-  };
+  }
+
+  symbolSearchBtn.onclick = runSymbolSearch;
+  symbolSearchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); runSymbolSearch(); }
+  });
 
   document.getElementById("saveTileBtn").onclick = () => {
     const label = document.getElementById("tileLabel").value.trim();

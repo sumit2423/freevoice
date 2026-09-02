@@ -119,8 +119,14 @@
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, n || 10);
   }
 
+  function topTileIds(log, n) {
+    const counts = {};
+    (log || []).forEach(e => { counts[e.tileId] = (counts[e.tileId] || 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, n || 8).map(e => e[0]);
+  }
+
   global.FreeVoiceCore = {
     GRID_ROWS, GRID_COLS, MAX_LOG, POS_COLORS,
-    posKey, migrateState, nextEmptySlot, buildOBF, parseOBF, capLog, csvFromLog, logStats, topWords
+    posKey, migrateState, nextEmptySlot, buildOBF, parseOBF, capLog, csvFromLog, logStats, topWords, topTileIds
   };
 })(window);

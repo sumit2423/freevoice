@@ -135,6 +135,16 @@
     assertEqual(top.length, 2, "topWords returns one entry per distinct label");
   })();
 
+  // ---- topTileIds ----
+  (function () {
+    const log = [{ tileId: "t1" }, { tileId: "t1" }, { tileId: "t2" }, { tileId: "t3" }];
+    const top = C.topTileIds(log, 2);
+    assertEqual(top, ["t1", "t2"], "topTileIds sorts by frequency descending and respects the limit");
+  })();
+  (function () {
+    assertEqual(C.topTileIds([], 8), [], "topTileIds returns an empty array for an empty log");
+  })();
+
   // ---- render ----
   const resultsEl = document.getElementById("results");
   let passCount = 0;

@@ -88,6 +88,22 @@
   .tile .label { margin-top: 6px; font-size: 14px; font-weight: 700; text-align: center; }
   .tile-empty { visibility: hidden; }
 
+  /* Frequently Used strip */
+  #freqSection {
+    flex-shrink: 0; background: var(--panel); border-top: 3px solid #e2e6ef;
+  }
+  #freqSection.hidden { display: none; }
+  #freqSection h3 {
+    margin: 0; padding: 6px 12px 0; font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .04em; color: #8892a6;
+  }
+  #freqBar { display: flex; gap: 8px; padding: 8px 10px; overflow-x: auto; }
+  #freqBar .tile {
+    flex: 0 0 auto; width: 78px; aspect-ratio: auto; padding: 4px;
+  }
+  #freqBar .tile .emoji { font-size: 30px; }
+  #freqBar .tile .label { font-size: 11px; margin-top: 3px; }
+
   /* Admin overlay */
   #adminOverlay {
     position: fixed; inset: 0; background: rgba(20,24,34,.92); color: white;
@@ -180,7 +196,7 @@
   #updateDismissBtn { background: transparent; color: #9ca3af; font-size: 16px; padding: 4px 8px; }
 
   @media print {
-    #sentenceBar, #tabs, #gearBtn, #updateBanner { display: none !important; }
+    #sentenceBar, #tabs, #gearBtn, #updateBanner, #freqSection { display: none !important; }
     body { background: white; }
     #grid { display: grid; grid-template-columns: repeat(5, 1fr); }
     .tile { border: 2px solid #999; break-inside: avoid; }
@@ -200,6 +216,10 @@
   </div>
   <div id="tabs"></div>
   <div id="grid"></div>
+  <div id="freqSection" class="hidden">
+    <h3>⭐ Frequently Used</h3>
+    <div id="freqBar"></div>
+  </div>
 </div>
 
 <div id="updateBanner">
@@ -376,8 +396,9 @@
   const COOLDOWN_TAPS = 3, COOLDOWN_WINDOW_MS = 5000, COOLDOWN_MS = 2200;
   const {
     GRID_ROWS, GRID_COLS, MAX_LOG, POS_COLORS,
-    posKey, migrateState, nextEmptySlot, buildOBF, parseOBF, capLog, csvFromLog, logStats, topWords
+    posKey, migrateState, nextEmptySlot, buildOBF, parseOBF, capLog, csvFromLog, logStats, topWords, topTileIds
   } = FreeVoiceCore;
+  const FREQ_COUNT = 8;
 
   const defaultState = {
     currentCategory: "Core Words",
@@ -514,10 +535,52 @@
           }
           sentence.push(tile);
           renderSentence();
+          renderFrequent();
         };
         gridEl.appendChild(div);
       }
     }
+  }
+
+  // ---------- Frequently Used (derived from the tap log; a candidate home
+  // for future sentence-shortcut tiles once that lands) ----------
+  const freqSection = document.getElementById("freqSection");
+  const freqBar = document.getElementById("freqBar");
+
+  function findTileById(id) {
+    for (const cat of Object.keys(state.categories)) {
+      const t = (state.categories[cat] || []).find(t => t.id === id);
+      if (t) return t;
+    }
+    return null;
+  }
+
+  function renderFrequent() {
+    let log = [];
+    try { log = JSON.parse(localStorage.getItem(LOG_KEY) || "[]"); } catch (e) {}
+    const tiles = topTileIds(log, FREQ_COUNT).map(findTileById).filter(Boolean);
+    freqBar.innerHTML = "";
+    freqSection.classList.toggle("hidden", tiles.length === 0);
+    tiles.forEach(tile => {
+      const div = buildTileEl(tile);
+      div.onclick = () => {
+        if (tileCooldownCheck(tile.id)) {
+          div.classList.add("cooldown");
+          setTimeout(() => div.classList.remove("cooldown"), COOLDOWN_MS);
+          return;
+        }
+        logTap(tile);
+        if (tile.audio) {
+          new Audio(tile.audio).play();
+        } else {
+          speak(tile.label);
+        }
+        sentence.push(tile);
+        renderSentence();
+        renderFrequent();
+      };
+      freqBar.appendChild(div);
+    });
   }
 
   function renderSentence() {
@@ -556,7 +619,7 @@
   document.getElementById("helpBtn").onclick = () => helpOverlay.classList.add("open");
   document.getElementById("closeHelpBtn").onclick = () => helpOverlay.classList.remove("open");
 
-  function renderAll() { renderTabs(); renderGrid(); renderSentence(); }
+  function renderAll() { renderTabs(); renderGrid(); renderSentence(); renderFrequent(); }
   renderAll();
 
   // ---------- PIN gate ----------

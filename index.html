@@ -26,7 +26,13 @@
   }
   #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
-  #appLogo, #appTitle { display: none; }
+  #appLogo {
+    display: block; width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+  }
+  #appTitle {
+    display: block; font-size: 16px; font-weight: 800; letter-spacing: -.01em;
+    color: #131b2e; margin-right: 6px; flex-shrink: 0; white-space: nowrap;
+  }
 
   /* Sentence bar */
   #sentenceBar {
@@ -35,7 +41,7 @@
     border-bottom: 3px solid #e2e6ef; min-height: 72px;
   }
   #sentenceStrip {
-    flex: 1; display: flex; gap: 8px; overflow-x: auto; height: 64px;
+    flex: 1; display: flex; gap: 8px; overflow-x: auto; height: 64px; min-width: 40px;
   }
   #sentenceStrip .chip {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -43,6 +49,7 @@
     font-size: 26px; flex-shrink: 0; padding: 2px;
   }
   #sentenceStrip .chip span { font-size: 10px; line-height: 1; }
+  #barActions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .bar-btn {
     border: none; border-radius: 12px; height: 60px; padding: 0 16px;
     font-size: 16px; font-weight: 600; cursor: pointer; flex-shrink: 0;
@@ -50,15 +57,16 @@
   #speakBtn { background: var(--accent); color: white; }
   #clearBtn { background: #e5e7eb; color: #333; }
   #gearBtn, #fullscreenBtn, #helpBtn {
-    background: transparent; color: #9ca3af; font-size: 20px; height: 60px; width: 44px;
-    border: none; cursor: pointer; flex-shrink: 0;
+    background: #f3f4f6; color: #6b7280; height: 44px; width: 44px; border-radius: 10px;
+    border: none; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   }
+  #gearBtn svg, #fullscreenBtn svg, #helpBtn svg { width: 20px; height: 20px; }
 
   /* On phone-width screens, five buttons plus the strip can't share one row —
-     give the sentence strip its own full-width row and wrap the buttons below it. */
+     give the button group its own full-width row below the logo/strip row. */
   @media (max-width: 700px) {
     #sentenceBar { flex-wrap: wrap; min-height: 0; row-gap: 6px; }
-    #sentenceStrip { flex-basis: 100%; }
+    #barActions { flex-basis: 100%; justify-content: flex-end; }
   }
 
   /* Desktop: the phone/tablet layout stays untouched below this — this just adds
@@ -71,19 +79,14 @@
       border-radius: 16px; overflow: hidden;
     }
 
-    #appLogo {
-      display: block; width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
-    }
-    #appTitle {
-      display: block; font-size: 19px; font-weight: 800; letter-spacing: -.01em;
-      color: #131b2e; margin-right: 10px; flex-shrink: 0; white-space: nowrap;
-    }
+    #appLogo { width: 30px; height: 30px; border-radius: 8px; }
+    #appTitle { font-size: 19px; margin-right: 10px; }
     #sentenceBar {
       padding: 12px 22px; gap: 10px; border-bottom: 1px solid #e5e9f2;
       box-shadow: 0 1px 0 rgba(24, 32, 52, .02);
     }
     #sentenceStrip { border-radius: 10px; }
-    .bar-btn, #gearBtn, #fullscreenBtn, #helpBtn { border-radius: 10px; }
+    .bar-btn { border-radius: 10px; }
     #speakBtn { box-shadow: 0 6px 16px -6px rgba(37, 99, 235, .55); }
     #clearBtn { background: #eef1f7; }
 
@@ -296,11 +299,19 @@
     <img id="appLogo" src="./icon.svg" alt="">
     <span id="appTitle">FreeVoice</span>
     <div id="sentenceStrip"></div>
-    <button class="bar-btn" id="clearBtn">Clear</button>
-    <button class="bar-btn" id="speakBtn">🔊 Speak</button>
-    <button id="fullscreenBtn" title="Fullscreen">⛶</button>
-    <button id="helpBtn" title="Help">❓</button>
-    <button id="gearBtn" title="Admin">⚙</button>
+    <div id="barActions">
+      <button class="bar-btn" id="clearBtn">Clear</button>
+      <button class="bar-btn" id="speakBtn">🔊 Speak</button>
+      <button id="fullscreenBtn" title="Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+      <button id="helpBtn" title="Help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </button>
+      <button id="gearBtn" title="Admin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
   </div>
   <div id="tabs"></div>
   <div id="grid"></div>

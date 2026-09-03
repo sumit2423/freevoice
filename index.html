@@ -26,12 +26,13 @@
   }
   #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
+  #brandRow { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   #appLogo {
     display: block; width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
   }
   #appTitle {
     display: block; font-size: 16px; font-weight: 800; letter-spacing: -.01em;
-    color: #131b2e; margin-right: 6px; flex-shrink: 0; white-space: nowrap;
+    color: #131b2e; flex-shrink: 0; white-space: nowrap;
   }
 
   /* Sentence bar */
@@ -62,11 +63,14 @@
   }
   #gearBtn svg, #fullscreenBtn svg, #helpBtn svg { width: 20px; height: 20px; }
 
-  /* On phone-width screens, five buttons plus the strip can't share one row —
-     give the button group its own full-width row below the logo/strip row. */
+  /* On phone-width screens, put the brand + buttons together on one row (reordered
+     visually via `order`, DOM stays as-is) and give the sentence strip its own full
+     row below — it needs the room once a sentence actually has words in it. */
   @media (max-width: 700px) {
     #sentenceBar { flex-wrap: wrap; min-height: 0; row-gap: 6px; }
-    #barActions { flex-basis: 100%; justify-content: flex-end; }
+    #brandRow { order: 1; }
+    #barActions { order: 2; margin-left: auto; }
+    #sentenceStrip { order: 3; flex-basis: 100%; }
   }
 
   /* Desktop: the phone/tablet layout stays untouched below this — this just adds
@@ -80,7 +84,7 @@
     }
 
     #appLogo { width: 30px; height: 30px; border-radius: 8px; }
-    #appTitle { font-size: 19px; margin-right: 10px; }
+    #appTitle { font-size: 19px; }
     #sentenceBar {
       padding: 12px 22px; gap: 10px; border-bottom: 1px solid #e5e9f2;
       box-shadow: 0 1px 0 rgba(24, 32, 52, .02);
@@ -296,8 +300,10 @@
 <body>
 <div id="app">
   <div id="sentenceBar">
-    <img id="appLogo" src="./icon.svg" alt="">
-    <span id="appTitle">FreeVoice</span>
+    <div id="brandRow">
+      <img id="appLogo" src="./icon.svg" alt="">
+      <span id="appTitle">FreeVoice</span>
+    </div>
     <div id="sentenceStrip"></div>
     <div id="barActions">
       <button class="bar-btn" id="clearBtn">Clear</button>

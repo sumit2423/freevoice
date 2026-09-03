@@ -26,6 +26,8 @@
   }
   #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
+  #appLogo, #appTitle { display: none; }
+
   /* Sentence bar */
   #sentenceBar {
     display: flex; align-items: center; gap: 8px;
@@ -57,6 +59,60 @@
   @media (max-width: 700px) {
     #sentenceBar { flex-wrap: wrap; min-height: 0; row-gap: 6px; }
     #sentenceStrip { flex-basis: 100%; }
+  }
+
+  /* Desktop: the phone/tablet layout stays untouched below this — this just adds
+     an "application window" frame, branding, and mouse-hover affordances for wide screens. */
+  @media (min-width: 900px) {
+    html, body { background: linear-gradient(180deg, #e9edf7 0%, #dde3f1 100%); }
+    #app {
+      max-width: 1180px; min-height: 640px; margin: 0 auto;
+      box-shadow: 0 24px 70px -24px rgba(24, 32, 52, .35), 0 2px 10px rgba(24, 32, 52, .06);
+      border-radius: 16px; overflow: hidden;
+    }
+
+    #appLogo {
+      display: block; width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    }
+    #appTitle {
+      display: block; font-size: 19px; font-weight: 800; letter-spacing: -.01em;
+      color: #131b2e; margin-right: 10px; flex-shrink: 0; white-space: nowrap;
+    }
+    #sentenceBar {
+      padding: 12px 22px; gap: 10px; border-bottom: 1px solid #e5e9f2;
+      box-shadow: 0 1px 0 rgba(24, 32, 52, .02);
+    }
+    #sentenceStrip { border-radius: 10px; }
+    .bar-btn, #gearBtn, #fullscreenBtn, #helpBtn { border-radius: 10px; }
+    #speakBtn { box-shadow: 0 6px 16px -6px rgba(37, 99, 235, .55); }
+    #clearBtn { background: #eef1f7; }
+
+    #tabs { padding: 10px 22px; gap: 8px; }
+    .tab { border-radius: 10px; }
+    .tab.active { box-shadow: 0 4px 12px -4px rgba(37, 99, 235, .5); }
+
+    #grid { padding: 18px 22px; gap: 14px; }
+    .tile { box-shadow: 0 1px 3px rgba(24, 32, 52, .05); }
+
+    #freqSection { border-top: 1px solid #e5e9f2; }
+    #freqBar { padding: 10px 22px; }
+  }
+
+  /* Hover affordances only for real pointers (mouse/trackpad) sharing this width,
+     so touchscreens never get a "stuck" hover state. */
+  @media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+    .bar-btn, #gearBtn, #fullscreenBtn, #helpBtn, .tab {
+      transition: background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .1s ease;
+    }
+    #speakBtn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+    #clearBtn:hover { background: #e2e7f0; }
+    #gearBtn:hover, #fullscreenBtn:hover, #helpBtn:hover { background: #eef1f7; color: #4b5563; }
+    .tab:hover:not(.active) { border-color: #b7c2db; background: #f7f9fc; }
+
+    .tile { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
+    .tile:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -12px rgba(24, 32, 52, .3); }
+
+    #freqBar .tile:hover { transform: translateY(-2px); }
   }
 
   /* Category tabs */
@@ -223,6 +279,8 @@
 <body>
 <div id="app">
   <div id="sentenceBar">
+    <img id="appLogo" src="./icon.svg" alt="">
+    <span id="appTitle">FreeVoice</span>
     <div id="sentenceStrip"></div>
     <button class="bar-btn" id="clearBtn">Clear</button>
     <button class="bar-btn" id="speakBtn">🔊 Speak</button>
@@ -287,7 +345,7 @@
       <li>Open this page in the device's browser, then use the browser menu → <strong>Add to Home Screen</strong>.</li>
       <li><strong>Android</strong>: Settings → Security → Screen Pinning → turn on, then pin FreeVoice from the recent-apps view.</li>
       <li><strong>iOS</strong>: Settings → Accessibility → Guided Access → turn on, then triple-click the side button while FreeVoice is open.</li>
-      <li>Already installed and stuck in landscape? That was a bug (now fixed) — remove the home screen icon and re-add it, since orientation gets baked in at install time and won't update on its own.</li>
+      <li>Stuck in landscape after installing? Orientation is set at install time, so remove the home screen icon and re-add it to pick up the correct portrait lock.</li>
     </ul>
   </details>
 

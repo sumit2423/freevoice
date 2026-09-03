@@ -1,6 +1,6 @@
 # FreeVoice — Quick Reference
 
-A working guide for whoever's setting up boards or troubleshooting — not the public-facing README (that's still a Phase 3 item once this is ready to give away).
+A working guide for whoever's setting up boards or troubleshooting.
 
 ## Everyday use (Talker Mode)
 
@@ -64,7 +64,7 @@ Both have matching **Import** buttons next to them.
 2. Use the browser menu → **Add to Home Screen** (this works because the app is an installable PWA).
 3. Launch it from the home screen icon from then on — it opens without the browser's address bar.
 
-**If you already installed it and it seems locked to landscape:** that was a real bug (fixed) — the manifest used to force landscape orientation. Unlike page code, some manifest properties (like orientation) get baked into the home-screen icon at install time on Android, so the update banner / refresh won't fix an already-installed icon. Remove the existing home screen icon and redo step 2 to pick up the fix.
+**If it seems locked to landscape:** some manifest properties (like orientation) get baked into the home-screen icon at install time on Android, so the update banner / refresh won't update an already-installed icon. Remove the existing home screen icon and redo step 2 to pick up the correct portrait lock.
 
 ## Locking the tablet to this app (kiosk mode)
 

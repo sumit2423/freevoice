@@ -91,7 +91,12 @@
     .tab { border-radius: 10px; }
     .tab.active { box-shadow: 0 4px 12px -4px rgba(37, 99, 235, .5); }
 
-    #grid { padding: 18px 22px; gap: 14px; }
+    /* Cap tile size on desktop instead of letting them stretch to fill the width —
+       overrides the inline grid-template-columns JS sets (5 must match GRID_COLS). */
+    #grid {
+      padding: 18px 22px; gap: 14px; justify-content: center;
+      grid-template-columns: repeat(5, 150px) !important;
+    }
     .tile { box-shadow: 0 1px 3px rgba(24, 32, 52, .05); }
 
     #freqSection { border-top: 1px solid #e5e9f2; }
